@@ -8,9 +8,8 @@ typedef enum tokens {
     label,
     loc_label,
     directive,
+    section,
     instruction,
-    pre_proc,
-    comma,
     empty_line,
     tok_error
 } tokens_table;

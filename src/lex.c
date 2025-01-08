@@ -33,28 +33,23 @@ void advance_char(parser_state_t *state) {
 }
 
 char *trim_whitespaces(const char *line) {
-    // Find the first non-whitespace character
     const char *start = line;
     while (isspace((unsigned char)*start)) {
         start++;
     }
 
-    // Find the last non-whitespace character
     const char *end = line + strlen(line) - 1;
     while (end > start && isspace((unsigned char)*end)) {
         end--;
     }
 
-    // Calculate the length of the trimmed string
     size_t trimmed_length = end - start + 1;
 
-    // Allocate memory for the new trimmed string
     char *trimmed_line = malloc(trimmed_length + 1);
     if (!trimmed_line) {
         return NULL;
     }
 
-    // Copy the trimmed content to the new string
     strncpy(trimmed_line, start, trimmed_length);
     trimmed_line[trimmed_length] = '\0';
 
@@ -69,12 +64,14 @@ token_t get_next_token(char *line, int *pos) {
         return token;
     }
 
+    /* Count spaces and tabs */
     while (isspace(line[*pos]) || line[*pos] == '\t') {
         if (line[*pos] == ' ') token.spaces++;
         if (line[*pos] == '\t') token.tabs++;
         (*pos)++;
     }
 
+    /* First word of the line to determine type of line */
     int word_pos = 0;
     while (!isspace(line[*pos]) && line[*pos] != '\0') {
         word[word_pos++] = line[*pos];
@@ -82,8 +79,11 @@ token_t get_next_token(char *line, int *pos) {
     }
     word[word_pos] = '\0';
 
-    /* Determine line type */
-    if (word[0] == '.' && word[word_pos-1] != ':') {
+    if (strcmp(word, ".section") == 0) {
+        token.type = section;
+        token.value = trim_whitespaces(line);
+    }
+    else if (word[0] == '.' && word[word_pos-1] != ':') {
         token.type = directive;
         token.value = trim_whitespaces(line);
     }
