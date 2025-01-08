@@ -24,14 +24,6 @@
 
 #include "lex.h"
 
-char peek_char(parser_state_t *state) {
-    return state->current_line[state->line_pos];
-}
-
-void advance_char(parser_state_t *state) {
-    state->line_pos++;
-}
-
 char *trim_whitespaces(const char *line) {
     const char *start = line;
     while (isspace((unsigned char)*start)) {

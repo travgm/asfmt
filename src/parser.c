@@ -64,22 +64,25 @@ void process_token(parser_state_t *state, token_t token) {
             break;
         case section:
             append_spaces(&state->output_buffer, 5);
+            buffer_len = strlen(state->output_buffer);
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             break;
         case instruction:
             append_spaces(&state->output_buffer, 5);
+            buffer_len = strlen(state->output_buffer);
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             break;
         case comment:
             if (state->prev_token == label) {
                 append_spaces(&state->output_buffer, 5);
+                buffer_len = strlen(state->output_buffer);
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             } else {
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             }
             break;
         case empty_line:
-            append_nl(&state->output_buffer);
+            //append_nl(&state->output_buffer);
             break;
         case line_eof:
             printf("End of File\n");
@@ -90,6 +93,7 @@ void process_token(parser_state_t *state, token_t token) {
         default:
             break;
     }
+    append_nl(&state->output_buffer);
 }
 
 parser_state_t *parse_file(parser_state_t *state, FILE *in_file) {
