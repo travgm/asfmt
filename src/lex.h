@@ -1,20 +1,18 @@
 #ifndef LEX_H_
 #define LEX_H_
 
-typedef enum tokens {
-    line_eof = 0,
-    nl,
-    comment,
-    label,
-    loc_label,
-    directive,
-    pre_proc,
-    comma
-} tokens_table;
+#include "tokens.h"
+#include "parser.h"
+
+#define MAX_LINE_LENGTH 2048
 
 typedef struct token {
     tokens_table type;
     char *value;
+    int spaces;
+    int tabs;
 } token_t;
+
+token_t get_next_token(char *line, int *pos);
 
 #endif

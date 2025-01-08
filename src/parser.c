@@ -32,7 +32,7 @@ parser_state_t *init_parser() {
         exit(1);
     }
 
-    state->lines = 0;
+    state->line_pos = 0;
     state->line_no = 0;
     state->current_token = 0;
     state->in_data_section = 0;
@@ -47,12 +47,23 @@ void free_parser(parser_state_t *state) {
 }
 
 int parse_file(parser_state_t *state, FILE *in_file) {
-    char *line = NULL;
     size_t len = 0;
     ssize_t read;
 
     while ((read = getline(&state->current_line, &len, in_file)) != -1) {
-        token_t *token = get_next_token(state);
+        int pos = 0;
+        token_t token = get_next_token(state->current_line, &pos);
+        
+        // Process token here
+        //process_token(token); 
+
+        // Only continue processing line if it's not a single-token line, instruction lines for example
+        if (token.type != label && token.type != directive && token.type != comment) {
+            while (pos < read) {
+                token = get_next_token(state->current_line, &pos);
+                //process_token(token);
+            }
+        }
     }
 
     return 0;

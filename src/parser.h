@@ -2,8 +2,7 @@
 #define PARSER_H_
 
 #include <stdio.h>
-
-#include "lex.h"
+#include "tokens.h"
 
 typedef struct parser_state {
     unsigned long int line_no;
