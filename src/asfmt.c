@@ -25,6 +25,7 @@
 
 #include "parser.h"
 #include "asfmt.h"
+#include "output.h"
 
 user_opts_t user_opts = {
     .spacing_from_col_1 = 5,
@@ -37,7 +38,7 @@ int create_copy_file(FILE *in_file, char *name) {
     snprintf(out_file, sizeof(out_file), "%s.bak", name);
     char buffer[1024];
     size_t bytes_read = 0;
-
+    
     FILE *out = fopen(out_file, "w");
     if (!out) {
         fprintf(stderr, "Error creating a backup of %s\n", name);
@@ -45,9 +46,15 @@ int create_copy_file(FILE *in_file, char *name) {
     }
 
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), in_file)) > 0) {
-        fwrite(buffer, 1, bytes_read, out);
+        size_t written = fwrite(buffer, 1, bytes_read, out);
+        if (written != bytes_read) {
+            fprintf(stderr, "Error writing to backup file\n");
+            fclose(out);
+            return -1;
+        }
     }
 
+    fclose(out);
     return 0;
 }
 
@@ -62,9 +69,18 @@ int process_file(parser_state_t *state, char *in_file) {
     }
     
     rewind(file);
-    int status = parse_file(state, file);
+    int status = 0;
 
+    parser_state_t *res = parse_file(state, file);
     fclose(file);
+    if (res->output_buffer == NULL) {
+        status = -1;
+        return status;
+    } else {
+        size_t buffer_len = strlen(res->output_buffer);
+        write_output_buffer(res->output_buffer, buffer_len, in_file);
+    }
+
     return status;
 }
 

@@ -24,6 +24,7 @@
 
 #include "parser.h"
 #include "lex.h"
+#include "output.h"
 
 parser_state_t *init_parser() {
     parser_state_t *state = malloc(sizeof(parser_state_t));
@@ -34,10 +35,13 @@ parser_state_t *init_parser() {
 
     state->line_pos = 0;
     state->line_no = 0;
-    state->current_token = 0;
+    state->prev_token = empty_line;
     state->in_data_section = 0;
     state->in_label = 0;
     state->in_local_label = 0;
+
+    state->output_buffer = malloc(MAX_OUTPUT_BUFFER_SIZE);
+    state->output_buffer[0] = '\0';
 
     return state;
 }
@@ -46,25 +50,66 @@ void free_parser(parser_state_t *state) {
     free(state);
 }
 
-int parse_file(parser_state_t *state, FILE *in_file) {
+void process_token(parser_state_t *state, token_t token) {
+    size_t buffer_len = strlen(state->output_buffer);
+    switch (token.type) {
+        case label:
+            append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            break;
+        case loc_label:
+            append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            break;
+        case directive:
+            append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            break;
+        case section:
+            append_spaces(&state->output_buffer, 5);
+            append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            break;
+        case instruction:
+            append_spaces(&state->output_buffer, 5);
+            append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            break;
+        case comment:
+            if (state->prev_token == label) {
+                append_spaces(&state->output_buffer, 5);
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            } else {
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            }
+            break;
+        case empty_line:
+            append_nl(&state->output_buffer);
+            break;
+        case line_eof:
+            printf("End of File\n");
+            break;
+        case tok_error:
+            printf("Error\n");
+            break;
+        default:
+            break;
+    }
+}
+
+parser_state_t *parse_file(parser_state_t *state, FILE *in_file) {
+    state->current_line = NULL; 
     size_t len = 0;
     ssize_t read;
 
     while ((read = getline(&state->current_line, &len, in_file)) != -1) {
         int pos = 0;
         token_t token = get_next_token(state->current_line, &pos);
-        
-        // Process token here
-        //process_token(token); 
+        process_token(state, token);
+        state->prev_token = token.type;
 
-        // Only continue processing line if it's not a single-token line, instruction lines for example
         if (token.type != label && token.type != directive && token.type != comment) {
             while (pos < read) {
                 token = get_next_token(state->current_line, &pos);
-                //process_token(token);
             }
         }
     }
 
-    return 0;
+    free(state->current_line);
+    return state;
 }
