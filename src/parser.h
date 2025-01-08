@@ -9,6 +9,7 @@ typedef struct parser_state {
     int line_pos;
     char *current_line;
     tokens_table current_token;
+    char *output_buffer;
 
     int in_data_section;
     int in_label;
