@@ -51,4 +51,8 @@ my_label:
 KNOWN BUGS
 
 - Multi line comments
-- Not spacing after comma in mov instructions (needs logic to be added)
+
+TODO
+
+- Not spacing after comma in mov instructions
+- use .asformat file for settings
