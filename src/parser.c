@@ -36,6 +36,7 @@ parser_state_t *init_parser() {
     state->line_pos = 0;
     state->line_no = 0;
     state->prev_token = empty_line;
+    state->prev_comment_space = 0;
     state->in_data_section = 0;
     state->in_label = 0;
     state->in_local_label = 0;
@@ -55,6 +56,7 @@ void process_token(parser_state_t *state, token_t token) {
     switch (token.type) {
         case label:
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            state->in_label = 1;
             break;
         case loc_label:
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
@@ -92,11 +94,20 @@ void process_token(parser_state_t *state, token_t token) {
             break;
         case comment:
             if (state->prev_token == label || state->prev_token == loc_label || 
-                state->prev_token == instruction || state->prev_token == comment) {
+                state->prev_token == instruction || state->in_label == 1) {
                 append_spaces(&state->output_buffer, 5);
                 buffer_len = strlen(state->output_buffer);
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
-            } else {
+
+                state->prev_comment_space = 5;
+            } else if (state->prev_token == comment)
+            {
+                append_spaces(&state->output_buffer, state->prev_comment_space);
+                buffer_len = strlen(state->output_buffer);
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);  /* code */
+            }
+            else {
+                state->prev_comment_space = 0;
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             }
             break;

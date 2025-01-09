@@ -13,6 +13,7 @@ typedef struct parser_state {
     tokens_table prev_token;
     char *output_buffer;
 
+    int prev_comment_space;
     int in_data_section;
     int in_label;
     int in_local_label;
