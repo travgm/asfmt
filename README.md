@@ -48,3 +48,7 @@ If its a comment before a label it lines it up with the label in column 0
 my_label:
      mov ....
 ```
+KNOWN BUGS
+
+- Multi line comments
+- Not spacing after comma in mov instructions (needs logic to be added)
