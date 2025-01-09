@@ -21,8 +21,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "lex.h"
+
+char *data_directives[] = {
+    ".byte",
+    ".word",
+    ".long",
+    ".quad",
+    ".ascii",
+    ".asciz",
+    ".string",
+    ".space",
+    ".fill",
+    ".zero",
+    ".comm",
+    ".lcomm"
+};
 
 char *trim_whitespaces(const char *line) {
     const char *start = line;
@@ -46,6 +62,15 @@ char *trim_whitespaces(const char *line) {
     trimmed_line[trimmed_length] = '\0';
 
     return trimmed_line;
+}
+
+bool is_data_directive(char *directive) {
+    for (long unsigned int i = 0; i < sizeof(data_directives) / sizeof(data_directives[0]); i++) {
+        if (strcmp(directive, data_directives[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 token_t get_next_token(char *line, int *pos) {
@@ -73,6 +98,19 @@ token_t get_next_token(char *line, int *pos) {
 
     if (strcmp(word, ".section") == 0) {
         token.type = section;
+        token.value = trim_whitespaces(line);
+    }
+    else if (strcmp(word, ".align") == 0 || strcmp(word, ".p2align") == 0 || 
+             strcmp(word, ".balign") == 0) {
+        token.type = align;
+        token.value = trim_whitespaces(line);
+    }
+    else if (strcmp(word, ".globl") == 0) {
+        token.type = globl;
+        token.value = trim_whitespaces(line);
+    }
+    else if (is_data_directive(word)) {
+        token.type = data_directive;
         token.value = trim_whitespaces(line);
     }
     else if (word[0] == '.' && word[word_pos-1] != ':') {

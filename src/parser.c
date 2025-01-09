@@ -62,6 +62,24 @@ void process_token(parser_state_t *state, token_t token) {
         case directive:
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             break;
+        case data_directive:
+            if (state->prev_token == label || state->prev_token == data_directive || state->prev_token == comment) {
+                append_spaces(&state->output_buffer, 5);
+                buffer_len = strlen(state->output_buffer);
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            } else {
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            }
+            break;
+        case align:
+            if (state->prev_token == section) {
+                append_spaces(&state->output_buffer, 5);
+                buffer_len = strlen(state->output_buffer);
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            } else {
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            }
+            break;
         case section:
             append_spaces(&state->output_buffer, 5);
             buffer_len = strlen(state->output_buffer);
@@ -73,7 +91,8 @@ void process_token(parser_state_t *state, token_t token) {
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             break;
         case comment:
-            if (state->prev_token == label) {
+            if (state->prev_token == label || state->prev_token == loc_label || 
+                state->prev_token == instruction || state->prev_token == comment) {
                 append_spaces(&state->output_buffer, 5);
                 buffer_len = strlen(state->output_buffer);
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
@@ -84,11 +103,8 @@ void process_token(parser_state_t *state, token_t token) {
         case empty_line:
             //append_nl(&state->output_buffer);
             break;
-        case line_eof:
-            printf("End of File\n");
-            break;
         case tok_error:
-            printf("Error\n");
+            printf("error parsing line: %s\n", token.value);
             break;
         default:
             break;
