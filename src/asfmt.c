@@ -64,6 +64,7 @@ int process_file(parser_state_t *state, char *in_file) {
     rewind(file);
     int status = 0;
 
+    user_opts_t opts = read_config_values();
     parser_state_t *res = parse_file(state, file);
     fclose(file);
     if (res->output_buffer == NULL) {
