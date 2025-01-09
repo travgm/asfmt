@@ -23,15 +23,8 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "parser.h"
 #include "asfmt.h"
-#include "output.h"
 
-user_opts_t user_opts = {
-    .spacing_from_col_1 = 5,
-    .spacing_from_def = 5,
-    .data_def_single_line = 0
-};
 
 int create_copy_file(FILE *in_file, char *name) {
     char out_file[1024];

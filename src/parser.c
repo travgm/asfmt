@@ -100,11 +100,11 @@ void process_token(parser_state_t *state, token_t token) {
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
 
                 state->prev_comment_space = 5;
-            } else if (state->prev_token == comment)
-            {
+            } 
+            else if (state->prev_token == comment) {
                 append_spaces(&state->output_buffer, state->prev_comment_space);
                 buffer_len = strlen(state->output_buffer);
-                append_output_buffer(&state->output_buffer, &buffer_len, token.value);  /* code */
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             }
             else {
                 state->prev_comment_space = 0;
