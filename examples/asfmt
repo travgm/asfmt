@@ -1,13 +1,16 @@
 # Default configuration file for asfmt
 # Rename this to .asfmt and copy it to the root directory of your project
 
-instruction= 5
-directive = 5
-section = 5
-label = 0
+# So far the only profile is hexproof, or you can comment this profile line out and
+# specify the settings yourself
+profile = hexproof
 
-heading_comments = 0
-inline_comments = 5
+# instruction = 5
+# directive = 5
+# section = 5
+# label = 0
+#heading_comments = 0
+#inline_comments = 5
 
 # IE: xor %rax, %rax
-space_after_comma = 1
+# space_after_comma = 1

@@ -51,7 +51,7 @@ void free_parser(parser_state_t *state) {
     free(state);
 }
 
-void process_token(parser_state_t *state, token_t token) {
+void process_token(parser_state_t *state, token_t token, int *pos) {
     size_t buffer_len = strlen(state->output_buffer);
     switch (token.type) {
         case label:
@@ -93,7 +93,20 @@ void process_token(parser_state_t *state, token_t token) {
             append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             break;
         case comment:
-            if (state->prev_token == label || state->prev_token == loc_label || 
+            // Need next token to determine if its a label
+            token_t next_token = get_next_token(state->current_line, pos);
+            if (state->prev_token == empty_line) {
+                state->in_label = 0;
+                state->prev_comment_space = 0;
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            }
+            else if (next_token.type == label) {
+                state->in_label = 0;
+                state->prev_comment_space = 0;
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+                process_token(state, next_token, pos);
+            }
+            else if (state->prev_token == label || state->prev_token == loc_label || 
                 state->prev_token == instruction || state->in_label == 1) {
                 append_spaces(&state->output_buffer, 5);
                 buffer_len = strlen(state->output_buffer);
@@ -131,7 +144,7 @@ parser_state_t *parse_file(parser_state_t *state, FILE *in_file) {
     while ((read = getline(&state->current_line, &len, in_file)) != -1) {
         int pos = 0;
         token_t token = get_next_token(state->current_line, &pos);
-        process_token(state, token);
+        process_token(state, token, &pos);
         state->prev_token = token.type;
 
         if (token.type != label && token.type != directive && token.type != comment) {
