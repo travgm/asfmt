@@ -107,7 +107,7 @@ void process_token(parser_state_t *state, token_t token, int *pos) {
                 process_token(state, next_token, pos);
             }
             else if (state->prev_token == label || state->prev_token == loc_label || 
-                state->prev_token == instruction || state->in_label == 1) {
+                state->prev_token == instruction) {
                 append_spaces(&state->output_buffer, 5);
                 buffer_len = strlen(state->output_buffer);
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
@@ -119,10 +119,16 @@ void process_token(parser_state_t *state, token_t token, int *pos) {
                 buffer_len = strlen(state->output_buffer);
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             }
+            else if (next_token.type == instruction) {
+                append_spaces(&state->output_buffer, 5);
+                buffer_len = strlen(state->output_buffer);
+                append_output_buffer(&state->output_buffer, &buffer_len, token.value);
+            }
             else {
                 state->prev_comment_space = 0;
                 append_output_buffer(&state->output_buffer, &buffer_len, token.value);
             }
+            state->prev_token = next_token.type;
             break;
         case empty_line:
             //append_nl(&state->output_buffer);
@@ -147,7 +153,7 @@ parser_state_t *parse_file(parser_state_t *state, FILE *in_file) {
         process_token(state, token, &pos);
         state->prev_token = token.type;
 
-        if (token.type != label && token.type != directive && token.type != comment) {
+        if (token.type != label && token.type != directive) {
             while (pos < read) {
                 token = get_next_token(state->current_line, &pos);
             }
